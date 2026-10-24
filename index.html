@@ -189,19 +189,21 @@ svg.ico { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejo
 .map-root strong { font-size: 22px; line-height: 1.3; }
 .map-link { display: block; width: 100%; height: 44px; overflow: visible; }
 .map-link line { stroke: var(--rule); stroke-width: 2; stroke-linecap: square; }
-.map-stages, .map-cases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 0; }
-.map-stages > *, .map-cases > * { margin-inline: 8px; }
+.stages { display: grid; grid-template-columns: 2fr 1fr 1fr; column-gap: 0; align-items: stretch; }
+.stage-group { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 1fr; min-width: 0; position: relative; }
+.sg-cases { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; position: relative; }
+.sg-a .sg-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sg-cases > .case { margin-inline: 8px; }
 .stage {
   justify-self: center; align-self: center;
   border: 1.5px solid var(--ink); border-radius: 999px; background: var(--bg);
   padding: 7px 18px; font-weight: 800; font-size: var(--fs-small); line-height: 1.3; white-space: nowrap;
 }
-.stage-a { grid-column: 1 / 3; }
 .case {
+  position: relative;
   background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
   padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; min-width: 0;
 }
-.case-stage { display: none; justify-self: start; }
 .case h3 { font-size: 19px; line-height: 1.35; }
 .case dl { display: grid; gap: 12px; }
 .case dt { margin-bottom: 2px; }
@@ -376,10 +378,10 @@ a.chip:hover { text-decoration: underline; text-underline-offset: 3px; }
 .flow-block { border: 1.5px solid var(--ink); background: var(--paper); padding: 20px 24px 26px; display: grid; grid-template-columns: minmax(0, 1fr); }
 .flow-block > .label { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
 .flow-block > .label::before { content: ""; width: 18px; border-top: 2px solid var(--ink); }
-.flow-node { border: 1.5px solid var(--ink); border-radius: 3px; padding: 10px 12px; background: var(--paper); display: grid; place-items: center; text-align: center; }
+.flow-node { border: 1.5px solid var(--ink); border-radius: 3px; padding: 10px 12px; background: var(--paper); display: flex; align-items: center; justify-content: center; text-align: center; min-height: 46px; }
 .flow-node b { font-size: 15px; line-height: 1.35; }
 .flow-node.hl { background: var(--soft); }
-.flow-row { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 8px; }
+.flow-row { display: flex; flex-wrap: nowrap; align-items: stretch; justify-content: center; gap: 8px; }
 .flow-row .flow-node { flex: 1 1 0; min-width: 150px; }
 .flow-row .flow-node.wide { flex: 2.4 1 0; }
 .arr { flex: none; width: 26px; align-self: center; color: var(--rule); }
@@ -424,22 +426,35 @@ a.chip:hover { text-decoration: underline; text-underline-offset: 3px; }
   .prepare { border-top: 0; border-left: 1px solid rgba(127, 160, 190, 0.45); }
 }
 @media (max-width: 899px) {
-  .map-link, .map-stages { display: none; }
-  .map-root, .tree-root { justify-self: stretch; text-align: left; margin-bottom: 16px; }
-  .map-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 16px; column-gap: 16px; }
-  .map-cases > * { margin-inline: 0; }
-  .case-stage { display: inline-block; }
-  .groups { grid-template-columns: minmax(0, 1fr); row-gap: 10px; }
-  .gbox, .gpanel { grid-row: auto; grid-column: auto; margin-inline: 0; }
-  .gpanel { margin-top: 0; }
-  .branches { grid-template-columns: minmax(0, 1fr); row-gap: 20px; }
-  .branches > * { margin-inline: 0; }
-  .flow-row { flex-direction: column; align-items: stretch; }
-  .flow-row .flow-node, .flow-row .flow-node.wide { flex: none; min-width: 0; }
-  .arr { align-self: center; transform: rotate(90deg); height: 26px; display: grid; place-items: center; }
-  .lane { grid-template-columns: minmax(0, 1fr); }
+  /* Trên điện thoại, các sơ đồ chuyển thành cây dọc: một trục bên trái, nét ngang nối vào từng ô. */
+  .map-link { display: none; }
+  .map-root, .tree-root { justify-self: stretch; text-align: left; margin-bottom: 0; }
+  .stages, .groups, .branches { grid-template-columns: minmax(0, 1fr); margin-left: 16px; padding-top: 14px; row-gap: 14px; position: relative; }
+  .stages > *, .groups > *, .branches > * { --bw: 0px; --tick: 18px; position: relative; margin: 0 0 0 20px; grid-row: auto; grid-column: auto; }
+  .stages > *::before, .groups > .gbox::before, .branches > *::before {
+    content: ""; position: absolute; left: calc(-20px - var(--bw)); top: var(--tick); width: 20px; border-top: 1.5px solid var(--rule);
+  }
+  .stages > *::after, .groups > *::after, .branches > *::after {
+    content: ""; position: absolute; left: calc(-20.75px - var(--bw)); top: calc(-14px - var(--bw)); bottom: calc(-14px - var(--bw)); border-left: 1.5px solid var(--rule);
+  }
+  .stages > :last-child::after, .branches > :last-child::after { bottom: auto; height: calc(14px + var(--tick) + var(--bw)); }
+  .groups > #box-4::after { bottom: auto; height: calc(14px + var(--tick) + var(--bw)); }
+  .groups > #nhom-4::after { display: none; }
+  .groups > .gbox, .groups > .gpanel { --bw: 1.5px; --tick: 33px; }
+  .branches > * { --tick: 34px; }
+  .stage { justify-self: start; }
+  .sg-cases, .sg-a .sg-cases { grid-template-columns: minmax(0, 1fr); margin-left: 14px; padding-top: 12px; row-gap: 12px; }
+  .sg-cases > .case { --bw: 1px; margin: 0 0 0 18px; }
+  .sg-cases > .case::before { content: ""; position: absolute; left: calc(-18px - var(--bw)); top: 28px; width: 18px; border-top: 1.5px solid var(--rule); }
+  .sg-cases > .case::after { content: ""; position: absolute; left: calc(-18.75px - var(--bw)); top: calc(-12px - var(--bw)); bottom: calc(-12px - var(--bw)); border-left: 1.5px solid var(--rule); }
+  .sg-cases > .case:last-child::after { bottom: auto; height: calc(12px + 28px + var(--bw)); }
+  .flow-row, .lane .flow-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; justify-items: stretch; }
+  .flow-node { display: block; text-align: center; min-height: 0; }
+  .arr { justify-self: center; width: 26px; height: 26px; display: grid; place-items: center; }
+  .arr svg { transform: rotate(90deg); }
+  .lane { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .lane-key { text-align: left; }
-  .loop { align-self: center; }
+  .loop { justify-self: center; }
   .tl-item { grid-template-columns: 24px minmax(0, 1fr); column-gap: 14px; row-gap: 8px; align-items: start; }
   .tl-item::before { left: 12px; }
   .tl-item:first-child::before { top: 20px; }
@@ -455,7 +470,6 @@ a.chip:hover { text-decoration: underline; text-underline-offset: 3px; }
   .letter-wrap { margin-top: -24px; }
   .spec { grid-template-columns: minmax(0, 1fr); }
   .spec div + div { border-left: 0; border-top: 1px solid var(--ink); }
-  .map-cases { grid-template-columns: minmax(0, 1fr); }
   .case { padding: 16px; }
   .cascade p:nth-child(2) { margin-left: 0.8em; }
   .cascade p:nth-child(3) { margin-left: 1.6em; }
@@ -539,56 +553,57 @@ a.chip:hover { text-decoration: underline; text-underline-offset: 3px; }
         <line x1="62.5%" y1="22" x2="62.5%" y2="44"/>
         <line x1="87.5%" y1="22" x2="87.5%" y2="44"/>
       </svg>
-      <div class="map-stages" aria-hidden="true">
-        <span class="stage stage-a">Được biết đến</span>
-        <span class="stage">Được cân nhắc</span>
-        <span class="stage">Được lựa chọn</span>
-      </div>
-      <svg class="map-link" aria-hidden="true">
-        <line x1="25%" y1="0" x2="25%" y2="22"/>
-        <line x1="12.5%" y1="22" x2="37.5%" y2="22"/>
-        <line x1="12.5%" y1="22" x2="12.5%" y2="44"/>
-        <line x1="37.5%" y1="22" x2="37.5%" y2="44"/>
-        <line x1="62.5%" y1="0" x2="62.5%" y2="44"/>
-        <line x1="87.5%" y1="0" x2="87.5%" y2="44"/>
-      </svg>
-      <div class="map-cases">
-        <article class="case">
-          <span class="stage case-stage">Được biết đến</span>
-          <h3>Khi muốn mở rộng nguồn khách hàng</h3>
-          <dl>
-            <div><dt class="label">Biểu hiện</dt><dd>Khách chủ yếu đến từ nguồn giới thiệu. Khi nguồn việc chậm lại, đơn vị chưa có hướng tiếp cận khác.</dd></div>
-            <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture hỗ trợ nghiên cứu khách hàng, lựa chọn cơ hội tiếp cận và xây dựng kế hoạch phù hợp với nguồn lực.</dd></div>
-          </dl>
-          <div class="leads"><a class="chip" href="#nhom-1"><span class="bubble">1</span>Chiến lược</a><a class="chip" href="#nhom-4"><span class="bubble">4</span>Quan hệ khách hàng</a></div>
-        </article>
-        <article class="case">
-          <span class="stage case-stage">Được biết đến</span>
-          <h3>Khi đã làm truyền thông nhưng chưa thu hút đúng khách hàng</h3>
-          <dl>
-            <div><dt class="label">Biểu hiện</dt><dd>Có kênh truyền thông nhưng ít chuyển đổi ra khách hàng tiềm năng.</dd></div>
-            <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture rà soát thông điệp, nội dung và kênh đang sử dụng để xác định hoạt động nào cần điều chỉnh.</dd></div>
-          </dl>
-          <div class="leads"><a class="chip" href="#nhom-1"><span class="bubble">1</span>Chiến lược</a><a class="chip" href="#nhom-2"><span class="bubble">2</span>Nội dung</a></div>
-        </article>
-        <article class="case">
-          <span class="stage case-stage">Được cân nhắc</span>
-          <h3>Khi khách hàng chưa nhận ra sự khác biệt</h3>
-          <dl>
-            <div><dt class="label">Biểu hiện</dt><dd>Khách đã xem công trình nhưng chưa hiểu giá trị dịch vụ và lý do nên lựa chọn đơn vị.</dd></div>
-            <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture khai thác những giá trị có thể chứng minh, phát triển thông điệp và nội dung giúp đơn vị trình bày rõ lý do mình phù hợp.</dd></div>
-          </dl>
-          <div class="leads"><a class="chip" href="#nhom-1"><span class="bubble">1</span>Chiến lược</a><a class="chip" href="#nhom-2"><span class="bubble">2</span>Nội dung</a><a class="chip" href="#nhom-3"><span class="bubble">3</span>PR và uy tín</a></div>
-        </article>
-        <article class="case">
-          <span class="stage case-stage">Được lựa chọn</span>
-          <h3>Khi đã có cơ hội nhưng quá trình trao đổi thiếu liên tục</h3>
-          <dl>
-            <div><dt class="label">Biểu hiện</dt><dd>Thông tin khách hàng nằm ở nhiều nơi, chưa rõ ai phụ trách phản hồi và liên hệ lại nên dễ bỏ lỡ cơ hội hợp tác.</dd></div>
-            <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture hỗ trợ rà soát quá trình tiếp nhận, tổ chức thông tin, công cụ và cách phối hợp để đội ngũ tiếp tục công việc.</dd></div>
-          </dl>
-          <div class="leads"><a class="chip" href="#nhom-4"><span class="bubble">4</span>Quan hệ khách hàng</a></div>
-        </article>
+      <div class="stages">
+        <div class="stage-group sg-a">
+          <span class="stage">Được biết đến</span>
+          <svg class="map-link" aria-hidden="true"><line x1="50%" y1="0" x2="50%" y2="22"/><line x1="25%" y1="22" x2="75%" y2="22"/><line x1="25%" y1="22" x2="25%" y2="44"/><line x1="75%" y1="22" x2="75%" y2="44"/></svg>
+          <div class="sg-cases">
+            <article class="case">
+              <h3>Khi muốn mở rộng nguồn khách hàng</h3>
+              <dl>
+                <div><dt class="label">Biểu hiện</dt><dd>Khách chủ yếu đến từ nguồn giới thiệu. Khi nguồn việc chậm lại, đơn vị chưa có hướng tiếp cận khác.</dd></div>
+                <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture hỗ trợ nghiên cứu khách hàng, lựa chọn cơ hội tiếp cận và xây dựng kế hoạch phù hợp với nguồn lực.</dd></div>
+              </dl>
+              <div class="leads"><a class="chip" href="#nhom-1"><span class="bubble">1</span>Chiến lược</a><a class="chip" href="#nhom-4"><span class="bubble">4</span>Quan hệ khách hàng</a></div>
+            </article>
+            <article class="case">
+              <h3>Khi đã làm truyền thông nhưng chưa thu hút đúng khách hàng</h3>
+              <dl>
+                <div><dt class="label">Biểu hiện</dt><dd>Có kênh truyền thông nhưng ít chuyển đổi ra khách hàng tiềm năng.</dd></div>
+                <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture rà soát thông điệp, nội dung và kênh đang sử dụng để xác định hoạt động nào cần điều chỉnh.</dd></div>
+              </dl>
+              <div class="leads"><a class="chip" href="#nhom-1"><span class="bubble">1</span>Chiến lược</a><a class="chip" href="#nhom-2"><span class="bubble">2</span>Nội dung</a></div>
+            </article>
+          </div>
+        </div>
+        <div class="stage-group">
+          <span class="stage">Được cân nhắc</span>
+          <svg class="map-link" aria-hidden="true"><line x1="50%" y1="0" x2="50%" y2="44"/></svg>
+          <div class="sg-cases">
+            <article class="case">
+              <h3>Khi khách hàng chưa nhận ra sự khác biệt</h3>
+              <dl>
+                <div><dt class="label">Biểu hiện</dt><dd>Khách đã xem công trình nhưng chưa hiểu giá trị dịch vụ và lý do nên lựa chọn đơn vị.</dd></div>
+                <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture khai thác những giá trị có thể chứng minh, phát triển thông điệp và nội dung giúp đơn vị trình bày rõ lý do mình phù hợp.</dd></div>
+              </dl>
+              <div class="leads"><a class="chip" href="#nhom-1"><span class="bubble">1</span>Chiến lược</a><a class="chip" href="#nhom-2"><span class="bubble">2</span>Nội dung</a><a class="chip" href="#nhom-3"><span class="bubble">3</span>PR và uy tín</a></div>
+            </article>
+          </div>
+        </div>
+        <div class="stage-group">
+          <span class="stage">Được lựa chọn</span>
+          <svg class="map-link" aria-hidden="true"><line x1="50%" y1="0" x2="50%" y2="44"/></svg>
+          <div class="sg-cases">
+            <article class="case">
+              <h3>Khi đã có cơ hội nhưng quá trình trao đổi thiếu liên tục</h3>
+              <dl>
+                <div><dt class="label">Biểu hiện</dt><dd>Thông tin khách hàng nằm ở nhiều nơi, chưa rõ ai phụ trách phản hồi và liên hệ lại nên dễ bỏ lỡ cơ hội hợp tác.</dd></div>
+                <div><dt class="label">Hướng xử lý</dt><dd class="act">pRchitecture hỗ trợ rà soát quá trình tiếp nhận, tổ chức thông tin, công cụ và cách phối hợp để đội ngũ tiếp tục công việc.</dd></div>
+              </dl>
+              <div class="leads"><a class="chip" href="#nhom-4"><span class="bubble">4</span>Quan hệ khách hàng</a></div>
+            </article>
+          </div>
+        </div>
       </div>
     </div>
 
